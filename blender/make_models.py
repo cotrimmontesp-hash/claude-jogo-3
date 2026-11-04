@@ -69,10 +69,13 @@ def uv_sphere(name, loc, scale, seg=20, rings=12):
     smooth(o)
     return o
 
-def rbox(name, loc, size, bevel=0.01, segs=2):
+def rbox(name, loc, size, bevel=0.01, segs=2, rot=None):
+    from mathutils import Euler
     bm = bmesh.new()
     bmesh.ops.create_cube(bm, size=1.0)
     bmesh.ops.scale(bm, vec=Vector(size), verts=bm.verts)
+    if rot:
+        bmesh.ops.rotate(bm, cent=Vector((0, 0, 0)), matrix=Euler(rot).to_matrix(), verts=bm.verts)
     bmesh.ops.translate(bm, vec=Vector(loc), verts=bm.verts)
     o = mesh_obj(name, bm)
     if bevel > 0:
@@ -229,8 +232,7 @@ def make_head():
         set_mat(ew, material('eye_white', srgb(0xf4f4f0), 0.3)); parts.append(ew)
         pu = uv_sphere('pu', (0.044 * s, -0.122, 1.785), (0.012, 0.006, 0.013), 12, 8)
         set_mat(pu, material('eye_dark', srgb(0x1b120c), 0.2)); parts.append(pu)
-        br = rbox('br', (0.047 * s, -0.115, 1.815), (0.045, 0.012, 0.009), 0.003)
-        br.rotation_euler = (0, -0.12 * s, 0)
+        br = rbox('br', (0.047 * s, -0.115, 1.815), (0.045, 0.012, 0.009), 0.003, rot=(0, -0.12 * s, 0))
         set_mat(br, material('hair', srgb(0x1b1b1b), 0.8)); parts.append(br)
     m = rbox('m', (0, -0.118, 1.705), (0.045, 0.01, 0.008), 0.003)
     set_mat(m, material('mouth', srgb(0x7a3b2e), 0.6)); parts.append(m)
@@ -312,7 +314,7 @@ def make_gear():
     p2 = rbox('p2', (0, 0.235, 1.22), (0.22, 0.05, 0.14), 0.015); set_mat(p2, pk)
     parts = [p1, p2]
     for s in (1, -1):
-        a = rbox('st', (0.085 * s, -0.1, 1.36), (0.035, 0.012, 0.3), 0.004); a.rotation_euler = (0.15, 0, 0); set_mat(a, st); parts.append(a)
+        a = rbox('st', (0.085 * s, -0.1, 1.36), (0.035, 0.012, 0.3), 0.004, rot=(0.15, 0, 0)); set_mat(a, st); parts.append(a)
     for o in parts:
         o.select_set(True)
     bpy.context.view_layer.objects.active = parts[0]
@@ -574,8 +576,8 @@ def build_guns():
         hg = rbox('hg', (0, -0.5, 0.025), (0.075, 0.3, 0.08), 0.012); set_mat(hg, acc_mat); p.append(hg)
         br = cylinder('br', (0, -0.62, 0.035), (0, -0.92, 0.035), 0.013, 0.013, 12); set_mat(br, metal); p.append(br)
         mz = cylinder('mz', (0, -0.9, 0.035), (0, -0.96, 0.035), 0.022, 0.022, 12); set_mat(mz, dark); p.append(mz)
-        mg = rbox('mg', (0, -0.24, -0.1), (0.05, 0.08, 0.17), 0.008); mg.rotation_euler = (D(-14), 0, 0); set_mat(mg, dark); p.append(mg)
-        gr = rbox('gr', (0, -0.02, -0.08), (0.045, 0.05, 0.12), 0.008); gr.rotation_euler = (D(18), 0, 0); set_mat(gr, dark); p.append(gr)
+        mg = rbox('mg', (0, -0.24, -0.1), (0.05, 0.08, 0.17), 0.008, rot=(D(-14), 0, 0)); set_mat(mg, dark); p.append(mg)
+        gr = rbox('gr', (0, -0.02, -0.08), (0.045, 0.05, 0.12), 0.008, rot=(D(18), 0, 0)); set_mat(gr, dark); p.append(gr)
         sk = rbox('sk', (0, 0.17, -0.005), (0.06, 0.24, 0.09), 0.015); set_mat(sk, acc_mat); p.append(sk)
         sp = rbox('sp', (0, 0.3, -0.02), (0.065, 0.03, 0.13), 0.01); set_mat(sp, dark); p.append(sp)
         sc = cylinder('sc', (0, -0.05, 0.135), (0, -0.26, 0.135), 0.022, 0.022, 14); set_mat(sc, dark); p.append(sc)
@@ -591,7 +593,7 @@ def build_guns():
     p = []
     b = rbox('pb', (0, -0.07, 0.03), (0.04, 0.2, 0.05), 0.008); set_mat(b, dark); p.append(b)
     sl = rbox('ps', (0, -0.075, 0.062), (0.038, 0.2, 0.025), 0.005); set_mat(sl, metal); p.append(sl)
-    gr = rbox('pg', (0, 0.0, -0.05), (0.036, 0.055, 0.12), 0.008); gr.rotation_euler = (D(14), 0, 0); set_mat(gr, dark); p.append(gr)
+    gr = rbox('pg', (0, 0.0, -0.05), (0.036, 0.055, 0.12), 0.008, rot=(D(14), 0, 0)); set_mat(gr, dark); p.append(gr)
     br = cylinder('pbr', (0, -0.17, 0.045), (0, -0.19, 0.045), 0.009, 0.009, 10); set_mat(br, dark); p.append(br)
     for o in p: o.select_set(True)
     bpy.context.view_layer.objects.active = p[0]

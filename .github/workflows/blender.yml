@@ -1,0 +1,40 @@
+name: Modelos no Blender
+on:
+  push:
+    branches: [main]
+    paths: ['blender/**', '.github/workflows/blender.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: blender
+  cancel-in-progress: true
+jobs:
+  modelos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar Blender 4.2 LTS
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 libice6 libx11-6 libxext6 >/dev/null
+          curl -fsSL https://download.blender.org/release/Blender4.2/blender-4.2.3-linux-x64.tar.xz -o b.tar.xz
+          tar -xf b.tar.xz
+          mv blender-4.2.3-linux-x64 blender-app
+          ./blender-app/blender --version | head -1
+      - name: Gerar modelos
+        run: |
+          mkdir -p models
+          set +e
+          ./blender-app/blender -b --factory-startup -P blender/make_models.py -- models > models/blender_log.txt 2>&1
+          echo "codigo de saida: $?" >> models/blender_log.txt
+          tail -60 models/blender_log.txt
+          ls -la models
+      - name: Salvar no repositório
+        run: |
+          git config user.name "claude-modelos"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add models
+          git commit -m "Modelos gerados no Blender [skip ci]" || exit 0
+          git pull --rebase -q
+          git push

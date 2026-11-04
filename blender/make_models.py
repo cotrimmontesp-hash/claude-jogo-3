@@ -463,21 +463,40 @@ def build_animations(rig):
 
     def walk(t, armed=False, run=False):
         sp = neutral()
-        s = leg_cycle(sp, t, 44 if run else 26, 85 if run else 40)
-        bob = abs(math.cos(t * 2 * math.pi))
-        sp['spine'] = (8 if run else 2, -s * (6 if run else 4), 0)
+        ph = t * 2 * math.pi
+        s = math.sin(ph); c = math.cos(ph)
+        if run:
+            # corrida: coxa sobe bem à frente, perna de trás empurra, calcanhar sobe
+            sp['thigh.L'] = (22 + 48 * s, 0, 2); sp['thigh.R'] = (22 - 48 * s, 0, -2)
+            sp['shin.L'] = (-20 - 95 * max(0, -c) - 25 * max(0, s), 0, 0); sp['shin.R'] = (-20 - 95 * max(0, c) - 25 * max(0, -s), 0, 0)
+            sp['foot.L'] = (-15 + 35 * max(0, -s), 0, 0); sp['foot.R'] = (-15 + 35 * max(0, s), 0, 0)
+            sp['hips'] = (0, s * 7, 0)
+            sp['spine'] = (14, -s * 9, 0); sp['head'] = (-8, s * 5, 0)
+            bob = abs(c)
+        else:
+            s2 = leg_cycle(sp, t, 26, 40)
+            sp['spine'] = (2, -s2 * 4, 0)
+            bob = abs(c)
         if armed:
-            aiming(sp, 4 if run else 0)
+            aiming(sp, 6 if run else 0)
+            if run:
+                sp['chest'] = (6, s * 6, 0)
         else:
             relaxed(sp)
-            sw = 42 if run else 20
-            sp['upperarm.L'] = (-s * sw, 0, 8); sp['upperarm.R'] = (s * sw, 0, -8)
-            sp['forearm.L'] = ((70 if run else 15) + max(0, -s) * 15, 0, 0); sp['forearm.R'] = ((70 if run else 15) + max(0, s) * 15, 0, 0)
-        return sp, (0, (0.045 if run else 0.025) * bob - (0.03 if run else 0.01), 0)
+            if run:
+                # braços dobrados em 90° balançando forte
+                sp['upperarm.L'] = (-s * 55 + 10, 0, 10); sp['upperarm.R'] = (s * 55 + 10, 0, -10)
+                sp['forearm.L'] = (88 + max(0, s) * 20, 0, 0); sp['forearm.R'] = (88 + max(0, -s) * 20, 0, 0)
+                sp['hand.L'] = (-10, 0, 0); sp['hand.R'] = (-10, 0, 0)
+            else:
+                sw = 20
+                sp['upperarm.L'] = (-s * sw, 0, 8); sp['upperarm.R'] = (s * sw, 0, -8)
+                sp['forearm.L'] = (15 + max(0, -s) * 15, 0, 0); sp['forearm.R'] = (15 + max(0, s) * 15, 0, 0)
+        return sp, (0, (0.07 if run else 0.025) * bob - (0.05 if run else 0.01), 0)
     make_action(rig, 'walk', K(32, 9), lambda t: walk(t))
-    make_action(rig, 'run', K(20, 9), lambda t: walk(t, run=True))
+    make_action(rig, 'run', K(18, 13), lambda t: walk(t, run=True))
     make_action(rig, 'aim_walk', K(32, 9), lambda t: walk(t, True))
-    make_action(rig, 'aim_run', K(20, 9), lambda t: walk(t, True, True))
+    make_action(rig, 'aim_run', K(18, 13), lambda t: walk(t, True, True))
 
     def crouch(t, moving):
         sp = neutral(); aiming(sp, 6)
@@ -735,29 +754,94 @@ def build_props():
     metal = material('metal', srgb(0x3b3f46), 0.4, 0.8)
     straw = material('palha', srgb(0xe2c35a), 0.95)
     straw_d = material('palha_escura', srgb(0xc9a843), 0.95)
-    # ---- pinheiros (2 variações) ----
+    birch = material('betula', srgb(0xe8e4da), 0.8)
+    birch_d = material('betula_mancha', srgb(0x2b2b2b), 0.8)
+    leaf3 = material('folha_amarela', srgb(0x9cc43c), 0.8)
+    palm_t = material('palmeira', srgb(0x9b7b55), 0.9)
+    frond = material('folha_palma', srgb(0x4f9a35), 0.8)
+    # ---- pinheiros: muitas camadas de galhos caídos ----
     for k, (m1, m2) in enumerate(((pine, pine2), (pine2, pine))):
         parts = []
-        t = cylinder('t', (0, 0, 0), (0, 0, 2.2), 0.24, 0.13, 10); set_mat(t, bark); parts.append(t)
-        layers = [(1.1, 2.3, 2.15), (2.3, 2.1, 1.7), (3.4, 1.9, 1.25), (4.4, 1.6, 0.8)]
-        for i, (z, h, r) in enumerate(layers):
-            c = cylinder('c', (0, 0, z), (0, 0, z + h), r, 0.04, 12 + k * 2)
+        t = cylinder('t', (0, 0, 0), (0, 0, 5.6), 0.26, 0.05, 10); set_mat(t, bark); parts.append(t)
+        n = 7
+        for i in range(n):
+            z = 0.9 + i * 0.68; r = 2.25 * (1 - i / (n + 0.6)) + 0.25; h = 1.35
+            c = cylinder('c', (0, 0, z), (0, 0, z + h), r, 0.03, 16)
             for v in c.data.vertices:
-                if v.co.z < z + 0.05:  # borda de baixo ondulada
-                    a = math.atan2(v.co.y, v.co.x)
-                    v.co.z -= 0.18 * (0.5 + 0.5 * math.sin(a * 6 + i + k))
-            jitter(c, 0.05, i + k * 10)
+                if v.co.z < z + 0.05:
+                    a2 = math.atan2(v.co.y, v.co.x)
+                    w = 0.5 + 0.5 * math.sin(a2 * 8 + i * 1.7 + k)
+                    v.co.z -= 0.35 * w + 0.1          # pontas dos galhos caem
+                    v.co.x *= 1 + 0.12 * w; v.co.y *= 1 + 0.12 * w
+            jitter(c, 0.06, i + k * 10)
             set_mat(c, m1 if i % 2 == 0 else m2); parts.append(c)
+        tip = cylinder('tp', (0, 0, 5.4), (0, 0, 6.3), 0.35, 0.02, 10); set_mat(tip, m1); parts.append(tip)
         finish(parts, 'pine_' + 'ab'[k])
-    # ---- árvore frondosa ----
+    # ---- árvore frondosa: galhos e várias copas ----
+    def broadleaf(name, lm, lm2, seed):
+        random.seed(seed)
+        parts = []
+        t = cylinder('t', (0, 0, 0), (0, 0, 2.8), 0.32, 0.18, 12); set_mat(t, bark2); parts.append(t)
+        rt = [cylinder('r', (0, 0, 0.25), (math.cos(a) * 0.6, math.sin(a) * 0.6, -0.05), 0.14, 0.05, 6) for a in (0.4, 2.5, 4.4)]
+        for r in rt: set_mat(r, bark2); parts.append(r)
+        ends = []
+        for j in range(4):
+            a = j / 4 * math.tau + random.uniform(-0.3, 0.3)
+            e = Vector((math.cos(a) * random.uniform(0.9, 1.3), math.sin(a) * random.uniform(0.9, 1.3), random.uniform(3.1, 3.8)))
+            br = cylinder('b', (0, 0, random.uniform(1.9, 2.5)), e, 0.12, 0.05, 8); set_mat(br, bark2); parts.append(br)
+            ends.append(e)
+        ends.append(Vector((0, 0, 4.1)))
+        for i, e in enumerate(ends):
+            for q in range(3):
+                off = Vector((random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5), random.uniform(-0.2, 0.4)))
+                r = random.uniform(0.75, 1.15) * (1.2 if i == len(ends) - 1 else 1)
+                f = ico('f', tuple(e + off), (r, r, r * 0.82), 2, 0.25, seed + i * 3.1 + q)
+                set_mat(f, lm if (i + q) % 2 == 0 else lm2); parts.append(f)
+        finish(parts, name)
+    broadleaf('tree_round', leaf, leaf2, 7)
+    broadleaf('tree_yellow', leaf2, leaf3, 21)
+    # ---- bétula (tronco branco com manchas) ----
     parts = []
-    t = cylinder('t', (0, 0, 0), (0, 0, 2.6), 0.3, 0.17, 10); set_mat(t, bark2); parts.append(t)
-    b1 = cylinder('b1', (0, 0, 1.9), (0.7, 0.2, 2.8), 0.12, 0.06, 8); set_mat(b1, bark2); parts.append(b1)
-    b2 = cylinder('b2', (0, 0, 2.1), (-0.6, -0.4, 3.0), 0.11, 0.05, 8); set_mat(b2, bark2); parts.append(b2)
-    for i, (x, y, z, r) in enumerate(((0, 0, 3.4, 1.55), (0.9, 0.3, 3.0, 1.05), (-0.8, -0.5, 3.15, 1.0), (0.2, -0.7, 3.9, 0.95), (-0.3, 0.7, 3.7, 0.9))):
-        f = ico('f', (x, y, z), (r, r, r * 0.85), 2, 0.22, i * 3.1)
-        set_mat(f, leaf if i % 2 == 0 else leaf2); parts.append(f)
-    finish(parts, 'tree_round')
+    t = cylinder('t', (0, 0, 0), (0.15, 0, 5.2), 0.16, 0.07, 10); set_mat(t, birch); parts.append(t)
+    random.seed(3)
+    for k in range(14):
+        z = random.uniform(0.3, 4.6); a = random.uniform(0, math.tau)
+        m = rbox('m', (math.cos(a) * 0.15 + z * 0.028, math.sin(a) * 0.15, z), (0.1, 0.1, 0.03), 0.005); set_mat(m, birch_d); parts.append(m)
+    for i, (x, y, z, r) in enumerate(((0.2, 0, 4.9, 1.0), (0.6, 0.3, 4.2, 0.8), (-0.3, -0.4, 4.3, 0.8), (0.1, 0.5, 3.6, 0.7), (-0.2, 0.1, 5.6, 0.7))):
+        f = ico('f', (x, y, z), (r * 0.9, r * 0.9, r * 1.2), 2, 0.3, 40 + i); set_mat(f, leaf2 if i % 2 else leaf3); parts.append(f)
+    finish(parts, 'birch')
+    # ---- palmeira (para a praia) ----
+    parts = []
+    pts = [Vector((0, 0, 0))]
+    for k in range(1, 9):
+        pts.append(Vector((math.sin(k / 8 * 1.2) * 0.9, 0, k * 0.68)))
+    for k in range(8):
+        sg = cylinder('s', tuple(pts[k]), tuple(pts[k + 1]), 0.2 - k * 0.012, 0.19 - k * 0.012, 10); set_mat(sg, palm_t if k % 2 else bark2); parts.append(sg)
+    top = pts[-1]
+    for k in range(8):
+        a = k / 8 * math.tau
+        bm = bmesh.new()
+        segs = 6
+        for i in range(segs + 1):
+            u = i / segs
+            r = 2.6 * u
+            z = 0.5 * math.sin(u * math.pi * 0.9) - 1.3 * u * u
+            w = 0.32 * math.sin(u * math.pi)
+            for sgn in (-1, 1):
+                px = math.cos(a) * r - math.sin(a) * w * sgn
+                py = math.sin(a) * r + math.cos(a) * w * sgn
+                bm.verts.new((top.x + px, top.y + py, top.z + z))
+        bm.verts.ensure_lookup_table()
+        for i in range(segs):
+            v0, v1, v2, v3 = bm.verts[i * 2], bm.verts[i * 2 + 1], bm.verts[i * 2 + 3], bm.verts[i * 2 + 2]
+            bm.faces.new((v0, v1, v2, v3))
+        fr = mesh_obj('fr', bm)
+        sol = fr.modifiers.new('s', 'SOLIDIFY'); sol.thickness = 0.03; bake(fr); smooth(fr)
+        set_mat(fr, frond); parts.append(fr)
+    for k in range(3):
+        a = k / 3 * math.tau
+        co = ico('co', (top.x + math.cos(a) * 0.2, top.y + math.sin(a) * 0.2, top.z - 0.25), (0.14, 0.14, 0.16), 1); set_mat(co, bark); parts.append(co)
+    finish(parts, 'palm')
     # ---- arbusto ----
     parts = []
     for i, (x, y, z, r) in enumerate(((0, 0, 0.45, 0.62), (0.5, 0.15, 0.35, 0.45), (-0.4, -0.2, 0.33, 0.42), (0.1, -0.4, 0.4, 0.4))):
@@ -927,14 +1011,22 @@ def build_extras():
     wn = rbox('wn', (0, 0.18, 1.2), (1.1, 0.04, 0.4), 0.01); set_mat(wn, glass); parts.append(wn)
     st = rbox('st', (0, 0.4, 0.58), (1.92, 4.2, 0.1), 0.02); set_mat(st, dark); parts.append(st)
     finish(parts, 'boat')
-    # ---- tufo de grama e flor ----
-    parts = []
-    random.seed(5)
-    for k in range(7):
-        a = k / 7 * math.tau + random.uniform(-0.3, 0.3); r = random.uniform(0.02, 0.1)
-        base = Vector((math.cos(a) * r, math.sin(a) * r, 0)); tip = base + Vector((math.cos(a) * 0.12, math.sin(a) * 0.12, random.uniform(0.3, 0.55)))
-        b = cylinder('g', base, tip, 0.03, 0.002, 3); set_mat(b, grass if k % 2 else grass2); parts.append(b)
-    finish(parts, 'grass')
+    # ---- tufos de grama (folhas curvas em 2 partes) ----
+    def tuft(name, n, hmin, hmax, seed, spread):
+        random.seed(seed)
+        parts = []
+        for k in range(n):
+            a = k / n * math.tau + random.uniform(-0.4, 0.4); r = random.uniform(0.0, spread)
+            h = random.uniform(hmin, hmax); lean = random.uniform(0.15, 0.4)
+            base = Vector((math.cos(a) * r, math.sin(a) * r, 0))
+            mid = base + Vector((math.cos(a) * h * lean * 0.4, math.sin(a) * h * lean * 0.4, h * 0.55))
+            tip = base + Vector((math.cos(a) * h * lean, math.sin(a) * h * lean, h))
+            b1 = cylinder('g', tuple(base), tuple(mid), 0.028, 0.018, 3); b2 = cylinder('g', tuple(mid), tuple(tip), 0.018, 0.001, 3)
+            m = grass if random.random() < 0.5 else grass2
+            set_mat(b1, m); set_mat(b2, m); parts += [b1, b2]
+        finish(parts, name)
+    tuft('grass', 14, 0.22, 0.5, 5, 0.14)
+    tuft('grass_tall', 10, 0.5, 0.9, 9, 0.12)
     parts = []
     s1 = cylinder('s', (0, 0, 0), (0.02, 0, 0.32), 0.012, 0.01, 5); set_mat(s1, stem); parts.append(s1)
     for k in range(5):

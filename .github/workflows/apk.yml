@@ -1,0 +1,54 @@
+name: Gerar APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Preparar app
+        run: |
+          mkdir -p www && cp -r repo/site/* www/
+          rm -f www/sw.js
+          # o PeerJS vai junto no app para o online carregar mais rápido
+          curl -fsSL https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js -o www/peerjs.min.js && sed -i 's#https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js#peerjs.min.js#' www/index.html || true
+          npm init -y
+          npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npx cap init "Último de Pé" com.claude.ultimodepe --web-dir www
+          npx cap add android
+          npx cap sync android
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:name=".MainActivity"/android:name=".MainActivity" android:screenOrientation="sensorLandscape"/' $M
+          grep -q sensorLandscape $M
+          grep -q android.permission.VIBRATE $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.VIBRATE" />\n</manifest>#' $M
+          sed -i 's#<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">#&\n        <item name="android:windowFullscreen">true</item>#' android/app/src/main/res/values/styles.xml || true
+          # ícone do jogo
+          for d in android/app/src/main/res/mipmap-*; do
+            for f in ic_launcher.png ic_launcher_round.png ic_launcher_foreground.png; do
+              [ -f "$d/$f" ] && convert repo/site/icon-512.png -resize $(identify -format '%wx%h' "$d/$f") "$d/$f" || true
+            done
+          done
+      - name: Compilar APK
+        run: |
+          cd android && chmod +x gradlew && ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../UltimoDePe.apk
+      - name: Publicar APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Último de Pé v${{ github.run_number }}
+          make_latest: true
+          files: UltimoDePe.apk

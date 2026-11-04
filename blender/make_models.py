@@ -257,15 +257,15 @@ def make_hairs():
     out = []
     # 1) curto
     a = uv_sphere('hair_short', (0, 0.0, 1.775), (0.132, 0.142, 0.15), 24, 16)
-    cut_below(a, lambda c: c.z < 1.74 and c.y < -0.02 or c.z < 1.70)
+    cut_below(a, lambda c: c.z < 1.845 and c.y < -0.03 or c.z < 1.70)
     sol = a.modifiers.new('s', 'SOLIDIFY'); sol.thickness = 0.012; bake(a); smooth(a)
     set_mat(a, hm); out.append(a)
     # 2) boné
-    b1 = uv_sphere('cap_top', (0, 0.0, 1.80), (0.137, 0.145, 0.12), 24, 14)
-    cut_below(b1, lambda c: c.z < 1.79)
+    b1 = uv_sphere('cap_top', (0, 0.0, 1.835), (0.137, 0.145, 0.115), 24, 14)
+    cut_below(b1, lambda c: c.z < 1.83)
     sol = b1.modifiers.new('s', 'SOLIDIFY'); sol.thickness = 0.015; bake(b1); smooth(b1)
     set_mat(b1, cm)
-    br = cylinder('brim', (0, -0.15, 1.795), (0, -0.15, 1.808), 0.11, 0.11, 24)
+    br = cylinder('brim', (0, -0.15, 1.832), (0, -0.15, 1.845), 0.11, 0.11, 24)
     br.scale = (1, 0.9, 1)
     set_mat(br, cm)
     back = uv_sphere('hb', (0, 0.02, 1.75), (0.128, 0.13, 0.1), 20, 12)
@@ -278,7 +278,7 @@ def make_hairs():
     out.append(join([b1, br, back], 'hair_cap'))
     # 3) moicano
     base = uv_sphere('mb', (0, 0.0, 1.77), (0.126, 0.137, 0.142), 20, 12)
-    cut_below(base, lambda c: c.z < 1.74 and c.y < -0.03 or c.z < 1.69)
+    cut_below(base, lambda c: c.z < 1.845 and c.y < -0.03 or c.z < 1.69)
     set_mat(base, hm)
     spikes = [base]
     for k in range(6):
@@ -288,14 +288,14 @@ def make_hairs():
     out.append(join(spikes, 'hair_mohawk'))
     # 4) comprido com rabo de cavalo
     l1 = uv_sphere('l1', (0, 0.0, 1.775), (0.134, 0.144, 0.152), 24, 16)
-    cut_below(l1, lambda c: c.z < 1.745 and c.y < -0.02 or c.z < 1.66)
+    cut_below(l1, lambda c: c.z < 1.845 and c.y < -0.03 or c.z < 1.66)
     set_mat(l1, hm)
     tail = cylinder('tail', (0, 0.13, 1.77), (0, 0.17, 1.52), 0.045, 0.02, 14); set_mat(tail, hm)
     tie = cylinder('tie', (0, 0.135, 1.765), (0, 0.142, 1.74), 0.048, 0.048, 14); set_mat(tie, cm)
     out.append(join([l1, tail, tie], 'hair_long'))
     # 5) bandana
-    bd = uv_sphere('bd', (0, 0.0, 1.785), (0.133, 0.143, 0.145), 24, 16)
-    cut_below(bd, lambda c: c.z < 1.775)
+    bd = uv_sphere('bd', (0, 0.0, 1.79), (0.133, 0.143, 0.145), 24, 16)
+    cut_below(bd, lambda c: c.z < 1.835)
     set_mat(bd, cm)
     kn = uv_sphere('kn', (0, 0.14, 1.79), (0.03, 0.025, 0.03), 12, 8); set_mat(kn, cm)
     t1 = rbox('t1', (0.02, 0.15, 1.73), (0.025, 0.008, 0.09), 0.003); set_mat(t1, cm)

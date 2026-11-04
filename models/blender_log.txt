@@ -4,107 +4,115 @@
 [modelos] acessórios
 [modelos] pesos
 [modelos] animações
-10:23:55 | INFO: Starting glTF 2.0 export
-10:23:55 | INFO: Extracting primitive: backpack
-10:23:55 | INFO: Primitives created: 2
-10:23:55 | INFO: Extracting primitive: body.001
-10:23:55 | INFO: Primitives created: 6
-10:23:55 | INFO: Extracting primitive: hair_bandana
-10:23:55 | INFO: Primitives created: 2
-10:23:55 | INFO: Extracting primitive: hair_cap
-10:23:55 | INFO: Primitives created: 2
-10:23:55 | INFO: Extracting primitive: hair_long
-10:23:55 | INFO: Primitives created: 2
-10:23:55 | INFO: Extracting primitive: hair_mohawk
-10:23:55 | INFO: Primitives created: 1
-10:23:55 | INFO: Extracting primitive: hair_short.001
-10:23:55 | INFO: Primitives created: 1
-10:23:55 | INFO: Extracting primitive: head
-10:23:55 | INFO: Primitives created: 5
-10:23:55 | INFO: Extracting primitive: vest
-10:23:55 | INFO: Primitives created: 2
-10:23:55 | INFO: Finished glTF 2.0 export in 0.8574166297912598 s
+11:42:49 | INFO: Starting glTF 2.0 export
+11:42:49 | INFO: Extracting primitive: backpack
+11:42:49 | INFO: Primitives created: 2
+11:42:49 | INFO: Extracting primitive: body.001
+11:42:49 | INFO: Primitives created: 6
+11:42:49 | INFO: Extracting primitive: hair_bandana
+11:42:49 | INFO: Primitives created: 2
+11:42:49 | INFO: Extracting primitive: hair_cap
+11:42:49 | INFO: Primitives created: 2
+11:42:49 | INFO: Extracting primitive: hair_long
+11:42:49 | INFO: Primitives created: 2
+11:42:49 | INFO: Extracting primitive: hair_mohawk
+11:42:49 | INFO: Primitives created: 1
+11:42:49 | INFO: Extracting primitive: hair_short.001
+11:42:49 | INFO: Primitives created: 1
+11:42:49 | INFO: Extracting primitive: head
+11:42:49 | INFO: Primitives created: 5
+11:42:49 | INFO: Extracting primitive: vest
+11:42:49 | INFO: Primitives created: 2
+11:42:50 | INFO: Finished glTF 2.0 export in 0.6370658874511719 s
 INFO Draco mesh compression is available, use library at /home/runner/work/claude-jogo-3/claude-jogo-3/blender-app/4.2/python/lib/python3.11/site-packages/libextern_draco.so
 
-[modelos] salvo models/personagem.glb 635792
-10:23:56 | INFO: Starting glTF 2.0 export
-10:23:56 | INFO: Extracting primitive: gun_rifle
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: gun_gold
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: gun_pistol
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: gun_smg
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: gun_shotgun
-10:23:56 | INFO: Primitives created: 4
-10:23:56 | INFO: Extracting primitive: gun_sniper
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: gun_lmg
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: gun_revolver
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Finished glTF 2.0 export in 0.03402090072631836 s
+[modelos] salvo models/personagem.glb 636572
+11:42:50 | INFO: Starting glTF 2.0 export
+11:42:50 | INFO: Extracting primitive: gun_rifle
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: gun_gold
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: gun_pistol
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: gun_smg
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: gun_shotgun
+11:42:50 | INFO: Primitives created: 4
+11:42:50 | INFO: Extracting primitive: gun_sniper
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: gun_lmg
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: gun_revolver
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Finished glTF 2.0 export in 0.026223421096801758 s
 
 [modelos] salvo models/armas.glb 132336
-10:23:56 | INFO: Starting glTF 2.0 export
-10:23:56 | INFO: Extracting primitive: pine_a
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: pine_b
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: tree_round
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: bush
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: rock_a
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: rock_b
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: car
-10:23:56 | INFO: Primitives created: 7
-10:23:56 | INFO: Extracting primitive: crate
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: barrel
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: lamp
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: hay
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Finished glTF 2.0 export in 0.06109881401062012 s
+11:42:50 | INFO: Starting glTF 2.0 export
+11:42:50 | INFO: Extracting primitive: pine_a
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: pine_b
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: tree_round
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: tree_yellow
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: birch
+11:42:50 | INFO: Primitives created: 4
+11:42:50 | INFO: Extracting primitive: palm
+11:42:50 | INFO: Primitives created: 4
+11:42:50 | INFO: Extracting primitive: bush
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: rock_a
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: rock_b
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: car
+11:42:50 | INFO: Primitives created: 7
+11:42:50 | INFO: Extracting primitive: crate
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: barrel
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: lamp
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: hay
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Finished glTF 2.0 export in 0.06281232833862305 s
 
-[modelos] salvo models/mapa.glb 166556
-10:23:56 | INFO: Starting glTF 2.0 export
-10:23:56 | INFO: Extracting primitive: container
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: fence
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: water_tower
-10:23:56 | INFO: Primitives created: 4
-10:23:56 | INFO: Extracting primitive: boat
-10:23:56 | INFO: Primitives created: 5
-10:23:56 | INFO: Extracting primitive: grass
-10:23:56 | INFO: Primitives created: 2
-10:23:56 | INFO: Extracting primitive: flower
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: plane
-10:23:56 | INFO: Primitives created: 5
-10:23:56 | INFO: Extracting primitive: chute
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: airdrop
-10:23:56 | INFO: Primitives created: 4
-10:23:56 | INFO: Extracting primitive: item_med
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: item_vest
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: item_ammo
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: item_wall
-10:23:56 | INFO: Primitives created: 3
-10:23:56 | INFO: Extracting primitive: icewall
-10:23:56 | INFO: Primitives created: 1
-10:23:56 | INFO: Finished glTF 2.0 export in 0.0725252628326416 s
+[modelos] salvo models/mapa.glb 268688
+11:42:50 | INFO: Starting glTF 2.0 export
+11:42:50 | INFO: Extracting primitive: container
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: fence
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: water_tower
+11:42:50 | INFO: Primitives created: 4
+11:42:50 | INFO: Extracting primitive: boat
+11:42:50 | INFO: Primitives created: 5
+11:42:50 | INFO: Extracting primitive: grass
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: grass_tall
+11:42:50 | INFO: Primitives created: 2
+11:42:50 | INFO: Extracting primitive: flower
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: plane
+11:42:50 | INFO: Primitives created: 5
+11:42:50 | INFO: Extracting primitive: chute
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: airdrop
+11:42:50 | INFO: Primitives created: 4
+11:42:50 | INFO: Extracting primitive: item_med
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: item_vest
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: item_ammo
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: item_wall
+11:42:50 | INFO: Primitives created: 3
+11:42:50 | INFO: Extracting primitive: icewall
+11:42:50 | INFO: Primitives created: 1
+11:42:50 | INFO: Finished glTF 2.0 export in 0.05832481384277344 s
 
-[modelos] salvo models/extras.glb 352620
+[modelos] salvo models/extras.glb 361780
 [modelos] FIM OK
 Blender 4.2.3 LTS (hash 0e22e4fcea03 built 2024-10-14 23:31:34)
 

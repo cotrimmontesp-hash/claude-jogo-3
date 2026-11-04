@@ -603,8 +603,168 @@ def build_guns():
     bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=False, export_animations=False, export_yup=True, export_apply=True)
     log('salvo', path, os.path.getsize(path))
 
+# --------------------------------------------------------------------------
+# PEÇAS DO MAPA (frente = -Y no Blender; origem no chão)
+# --------------------------------------------------------------------------
+from mathutils import noise as mnoise
+import random
+
+def ico(name, loc, scale, sub=2, amp=0.0, seed=0, flat=False):
+    bm = bmesh.new()
+    bmesh.ops.create_icosphere(bm, subdivisions=sub, radius=1.0)
+    for v in bm.verts:
+        if amp:
+            n = mnoise.noise(v.co * 1.7 + Vector((seed, seed * 2, seed * 3)))
+            v.co *= 1 + amp * n
+        v.co = Vector((v.co.x * scale[0], v.co.y * scale[1], v.co.z * scale[2])) + Vector(loc)
+    o = mesh_obj(name, bm)
+    if not flat:
+        smooth(o)
+    return o
+
+def jitter(obj, amp, seed=0):
+    random.seed(seed)
+    for v in obj.data.vertices:
+        v.co += Vector((random.uniform(-amp, amp), random.uniform(-amp, amp), random.uniform(-amp, amp)))
+
+def finish(parts, name):
+    for o in parts:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    o = join(parts, name)
+    return o
+
+def build_props():
+    reset()
+    bark = material('casca', srgb(0x6b4426), 0.9)
+    bark2 = material('casca_clara', srgb(0x7a5432), 0.9)
+    pine = material('pinho', srgb(0x2d7a3a), 0.85)
+    pine2 = material('pinho_escuro', srgb(0x23663a), 0.85)
+    leaf = material('folha', srgb(0x55a23e), 0.8)
+    leaf2 = material('folha_clara', srgb(0x6db84c), 0.8)
+    stone = material('pedra', srgb(0x8f959b), 0.95)
+    moss = material('musgo', srgb(0x5e8a3a), 0.95)
+    paint = material('paint', (0.85, 0.85, 0.85), 0.35, 0.3)
+    glass = material('vidro', srgb(0x1f2a33), 0.08, 0.2)
+    tire = material('pneu', srgb(0x161616), 0.9)
+    rim = material('aro', srgb(0xb8bec4), 0.3, 0.9)
+    lamp_c = material('farol', srgb(0xfff3c0), 0.2)
+    tail = material('lanterna', srgb(0xc0392b), 0.3)
+    trim = material('plastico', srgb(0x2a2c30), 0.6)
+    wood = material('madeira', srgb(0xb98548), 0.75)
+    wood_d = material('madeira_escura', srgb(0x7a5130), 0.8)
+    metal = material('metal', srgb(0x3b3f46), 0.4, 0.8)
+    straw = material('palha', srgb(0xe2c35a), 0.95)
+    straw_d = material('palha_escura', srgb(0xc9a843), 0.95)
+    # ---- pinheiros (2 variações) ----
+    for k, (m1, m2) in enumerate(((pine, pine2), (pine2, pine))):
+        parts = []
+        t = cylinder('t', (0, 0, 0), (0, 0, 2.2), 0.24, 0.13, 10); set_mat(t, bark); parts.append(t)
+        layers = [(1.1, 2.3, 2.15), (2.3, 2.1, 1.7), (3.4, 1.9, 1.25), (4.4, 1.6, 0.8)]
+        for i, (z, h, r) in enumerate(layers):
+            c = cylinder('c', (0, 0, z), (0, 0, z + h), r, 0.04, 12 + k * 2)
+            for v in c.data.vertices:
+                if v.co.z < z + 0.05:  # borda de baixo ondulada
+                    a = math.atan2(v.co.y, v.co.x)
+                    v.co.z -= 0.18 * (0.5 + 0.5 * math.sin(a * 6 + i + k))
+            jitter(c, 0.05, i + k * 10)
+            set_mat(c, m1 if i % 2 == 0 else m2); parts.append(c)
+        finish(parts, 'pine_' + 'ab'[k])
+    # ---- árvore frondosa ----
+    parts = []
+    t = cylinder('t', (0, 0, 0), (0, 0, 2.6), 0.3, 0.17, 10); set_mat(t, bark2); parts.append(t)
+    b1 = cylinder('b1', (0, 0, 1.9), (0.7, 0.2, 2.8), 0.12, 0.06, 8); set_mat(b1, bark2); parts.append(b1)
+    b2 = cylinder('b2', (0, 0, 2.1), (-0.6, -0.4, 3.0), 0.11, 0.05, 8); set_mat(b2, bark2); parts.append(b2)
+    for i, (x, y, z, r) in enumerate(((0, 0, 3.4, 1.55), (0.9, 0.3, 3.0, 1.05), (-0.8, -0.5, 3.15, 1.0), (0.2, -0.7, 3.9, 0.95), (-0.3, 0.7, 3.7, 0.9))):
+        f = ico('f', (x, y, z), (r, r, r * 0.85), 2, 0.22, i * 3.1)
+        set_mat(f, leaf if i % 2 == 0 else leaf2); parts.append(f)
+    finish(parts, 'tree_round')
+    # ---- arbusto ----
+    parts = []
+    for i, (x, y, z, r) in enumerate(((0, 0, 0.45, 0.62), (0.5, 0.15, 0.35, 0.45), (-0.4, -0.2, 0.33, 0.42), (0.1, -0.4, 0.4, 0.4))):
+        f = ico('b', (x, y, z), (r, r, r * 0.8), 2, 0.2, i * 7.3)
+        set_mat(f, leaf if i % 2 else leaf2); parts.append(f)
+    finish(parts, 'bush')
+    # ---- pedras (raio ~1, achatadas, musgo em cima) ----
+    for k in range(2):
+        r = ico('rock_' + 'ab'[k], (0, 0, 0.3), (1.0, 0.85 + 0.15 * k, 0.7), 2, 0.28, 11 + k * 5, flat=True)
+        r.data.materials.append(stone); r.data.materials.append(moss)
+        for pl in r.data.polygons:
+            pl.material_index = 1 if pl.normal.z > 0.82 else 0
+    # ---- carro (comprimento em Y) ----
+    parts = []
+    L, Wd = 4.2, 1.85
+    body = rbox('body', (0, 0, 0.66), (Wd, L, 0.62), 0.12, 3); set_mat(body, paint); parts.append(body)
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    for v in bm.verts:
+        top = v.co.z > 0
+        v.co.x *= Wd * (0.86 if top else 0.94)
+        v.co.y = v.co.y * (L * (0.36 if top else 0.56)) + 0.15
+        v.co.z = v.co.z * 0.58 + 1.24
+    cab = mesh_obj('cab', bm)
+    mb = cab.modifiers.new('b', 'BEVEL'); mb.width = 0.08; mb.segments = 3; bake(cab); smooth(cab)
+    set_mat(cab, paint); parts.append(cab)
+    win = rbox('win', (0, 0.15, 1.28), (Wd * 0.9, L * 0.4, 0.34), 0.06, 2); set_mat(win, glass); parts.append(win)
+    for sy in (1, -1):
+        bp = rbox('bp', (0, sy * (L / 2 + 0.02), 0.5), (Wd * 0.96, 0.16, 0.22), 0.06); set_mat(bp, trim); parts.append(bp)
+    for sx in (1, -1):
+        hl = rbox('hl', (sx * 0.62, -L / 2 - 0.01, 0.76), (0.34, 0.06, 0.14), 0.03); set_mat(hl, lamp_c); parts.append(hl)
+        tl = rbox('tl', (sx * 0.66, L / 2 + 0.01, 0.78), (0.3, 0.06, 0.12), 0.03); set_mat(tl, tail); parts.append(tl)
+        mi = rbox('mi', (sx * (Wd / 2 + 0.08), -0.55, 1.05), (0.14, 0.08, 0.1), 0.02); set_mat(mi, trim); parts.append(mi)
+        for sy in (1, -1):
+            wy = sy * L * 0.31
+            tr = cylinder('tr', (sx * (Wd / 2 - 0.12), wy, 0.38), (sx * (Wd / 2 + 0.06), wy, 0.38), 0.38, 0.38, 18); set_mat(tr, tire); parts.append(tr)
+            rm = cylinder('rm', (sx * (Wd / 2 + 0.02), wy, 0.38), (sx * (Wd / 2 + 0.07), wy, 0.38), 0.22, 0.22, 14); set_mat(rm, rim); parts.append(rm)
+    gr = rbox('gr', (0, -L / 2 - 0.015, 0.6), (0.9, 0.05, 0.16), 0.02); set_mat(gr, trim); parts.append(gr)
+    finish(parts, 'car')
+    # ---- caixote (cubo de 1 m) ----
+    parts = []
+    c = rbox('c', (0, 0, 0.5), (0.96, 0.96, 0.96), 0.02); set_mat(c, wood); parts.append(c)
+    for k in range(-1, 2):
+        for sy in (1, -1):
+            pl = rbox('p', (0, sy * 0.49, 0.5 + k * 0.3), (0.9, 0.03, 0.24), 0.01); set_mat(pl, wood); parts.append(pl)
+            pl = rbox('p', (sy * 0.49, 0, 0.5 + k * 0.3), (0.03, 0.9, 0.24), 0.01); set_mat(pl, wood); parts.append(pl)
+    for sx in (1, -1):
+        for sy in (1, -1):
+            e = rbox('e', (sx * 0.46, sy * 0.46, 0.5), (0.1, 0.1, 1.0), 0.015); set_mat(e, wood_d); parts.append(e)
+        for z in (0.04, 0.96):
+            e = rbox('e', (sx * 0.46, 0, z), (0.1, 1.0, 0.1), 0.015); set_mat(e, wood_d); parts.append(e)
+            e = rbox('e', (0, sx * 0.46, z), (1.0, 0.1, 0.1), 0.015); set_mat(e, wood_d); parts.append(e)
+    finish(parts, 'crate')
+    # ---- barril ----
+    parts = []
+    b = cylinder('b', (0, 0, 0), (0, 0, 1.2), 0.4, 0.4, 20); set_mat(b, paint); parts.append(b)
+    for z in (0.08, 0.42, 0.78, 1.12):
+        r = cylinder('r', (0, 0, z - 0.03), (0, 0, z + 0.03), 0.425, 0.425, 20); set_mat(r, metal); parts.append(r)
+    lid = cylinder('l', (0, 0, 1.2), (0, 0, 1.22), 0.36, 0.36, 20); set_mat(lid, metal); parts.append(lid)
+    cap = cylinder('cp', (0.18, 0, 1.22), (0.18, 0, 1.26), 0.05, 0.05, 10); set_mat(cap, trim); parts.append(cap)
+    finish(parts, 'barrel')
+    # ---- poste ----
+    parts = []
+    p1 = cylinder('p', (0, 0, 0), (0, 0, 4.3), 0.1, 0.07, 10); set_mat(p1, metal); parts.append(p1)
+    bs = cylinder('bs', (0, 0, 0), (0, 0, 0.35), 0.17, 0.14, 10); set_mat(bs, metal); parts.append(bs)
+    pts = [(0, 0, 4.3), (0.25, 0, 4.5), (0.6, 0, 4.55), (0.9, 0, 4.45)]
+    for a, b2 in zip(pts, pts[1:]):
+        s2 = cylinder('a', a, b2, 0.05, 0.05, 8); set_mat(s2, metal); parts.append(s2)
+    hd = rbox('h', (0.92, 0, 4.35), (0.42, 0.24, 0.14), 0.04); set_mat(hd, metal); parts.append(hd)
+    lt = rbox('lt', (0.92, 0, 4.27), (0.34, 0.18, 0.04), 0.01); set_mat(lt, lamp_c); parts.append(lt)
+    finish(parts, 'lamp')
+    # ---- fardo de feno (deitado no eixo X) ----
+    parts = []
+    hb = cylinder('h', (-0.6, 0, 0.65), (0.6, 0, 0.65), 0.65, 0.65, 24)
+    mbv = hb.modifiers.new('b', 'BEVEL'); mbv.width = 0.08; mbv.segments = 3; bake(hb); smooth(hb)
+    jitter(hb, 0.015, 3); set_mat(hb, straw); parts.append(hb)
+    for x in (-0.3, 0.3):
+        bd = cylinder('bd', (x - 0.03, 0, 0.65), (x + 0.03, 0, 0.65), 0.662, 0.662, 24); set_mat(bd, straw_d); parts.append(bd)
+    finish(parts, 'hay')
+    path = os.path.join(OUT, 'mapa.glb')
+    bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=False, export_animations=False, export_yup=True, export_apply=True)
+    log('salvo', path, os.path.getsize(path))
+
 ok = True
-for fn in (build_character, build_guns):
+for fn in (build_character, build_guns, build_props):
     try:
         fn()
     except Exception:

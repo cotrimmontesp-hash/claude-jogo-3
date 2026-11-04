@@ -480,16 +480,21 @@ def build_animations(rig):
     make_action(rig, 'aim_run', K(20, 9), lambda t: walk(t, True, True))
 
     def crouch(t, moving):
-        sp = neutral(); aiming(sp, 8)
+        sp = neutral(); aiming(sp, 6)
         if moving:
-            s = math.sin(t * 2 * math.pi)
-            sp['thigh.L'] = (75 + 18 * s, 0, 0); sp['thigh.R'] = (75 - 18 * s, 0, 0)
-        else:
-            sp['thigh.L'] = (85, 0, 4); sp['thigh.R'] = (40, 0, -4)
-        sp['shin.L'] = (-110 if not moving else -105, 0, 0); sp['shin.R'] = (-115 if not moving else -105, 0, 0)
-        sp['foot.L'] = (25, 0, 0); sp['foot.R'] = (45 if not moving else 25, 0, 0)
-        sp['spine'] = (12, 0, 0)
-        return sp, (0, -0.36, 0)
+            # andar abaixado: passos curtos alternados, quadril baixo
+            s = math.sin(t * 2 * math.pi); c = math.cos(t * 2 * math.pi)
+            sp['thigh.L'] = (78 + 22 * s, 0, 3); sp['thigh.R'] = (78 - 22 * s, 0, -3)
+            sp['shin.L'] = (-102 - 18 * max(0, -c), 0, 0); sp['shin.R'] = (-102 - 18 * max(0, c), 0, 0)
+            sp['foot.L'] = (20 + 10 * s, 0, 0); sp['foot.R'] = (20 - 10 * s, 0, 0)
+            sp['spine'] = (16, 0, 0)
+            return sp, (0, -0.40 + 0.02 * abs(c), 0)
+        # parado: joelho direito no chão, perna esquerda dobrada à frente
+        b = math.sin(t * 2 * math.pi)
+        sp['thigh.L'] = (98, 0, 6); sp['shin.L'] = (-104, 0, 0); sp['foot.L'] = (6, 0, 0)
+        sp['thigh.R'] = (18, 0, -6); sp['shin.R'] = (-118, 0, 0); sp['foot.R'] = (55, 0, 0)
+        sp['spine'] = (8 + b, 0, 0)
+        return sp, (0, -0.44, 0)
     make_action(rig, 'crouch_idle', K(40, 5), lambda t: crouch(t, False))
     make_action(rig, 'crouch_walk', K(36, 9), lambda t: crouch(t, True))
 
@@ -599,6 +604,79 @@ def build_guns():
     bpy.context.view_layer.objects.active = p[0]
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
     pi = join(p, 'gun_pistol'); pi.location.x = -0.3
+    walnut = material('nogueira', srgb(0x5a3a22), 0.55)
+    olive = material('oliva', srgb(0x4b5a36), 0.7)
+    chrome = material('cromado', srgb(0xb8bec4), 0.25, 0.95)
+    def done(parts, name, x):
+        for o in parts: o.select_set(True)
+        bpy.context.view_layer.objects.active = parts[0]
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        o = join(parts, name); o.location.x = x; return o
+    # submetralhadora (curta, pente reto, coronha de arame)
+    p = []
+    b = rbox('b', (0, -0.14, 0.02), (0.065, 0.32, 0.09), 0.01); set_mat(b, dark); p.append(b)
+    br = cylinder('br', (0, -0.3, 0.035), (0, -0.52, 0.035), 0.016, 0.016, 12); set_mat(br, metal); p.append(br)
+    sh = cylinder('sh', (0, -0.3, 0.035), (0, -0.44, 0.035), 0.03, 0.03, 12); set_mat(sh, dark); p.append(sh)
+    mg = rbox('mg', (0, -0.16, -0.13), (0.04, 0.05, 0.22), 0.006); set_mat(mg, dark); p.append(mg)
+    gr = rbox('gr', (0, 0.0, -0.07), (0.04, 0.05, 0.11), 0.006, rot=(D(16), 0, 0)); set_mat(gr, dark); p.append(gr)
+    for z in (-0.03, 0.05):
+        st = cylinder('st', (0, 0.02, z), (0, 0.24, z), 0.008, 0.008, 6); set_mat(st, metal); p.append(st)
+    bp = rbox('bp', (0, 0.25, 0.01), (0.05, 0.02, 0.11), 0.004); set_mat(bp, dark); p.append(bp)
+    rl = rbox('rl', (0, -0.14, 0.075), (0.03, 0.18, 0.02), 0.004); set_mat(rl, metal); p.append(rl)
+    done(p, 'gun_smg', 0.6)
+    # escopeta (cano longo, bomba de madeira)
+    p = []
+    b = rbox('b', (0, -0.1, 0.02), (0.07, 0.26, 0.1), 0.01); set_mat(b, dark); p.append(b)
+    br = cylinder('br', (0, -0.2, 0.05), (0, -0.88, 0.05), 0.02, 0.02, 14); set_mat(br, metal); p.append(br)
+    tb = cylinder('tb', (0, -0.2, 0.0), (0, -0.78, 0.0), 0.018, 0.018, 12); set_mat(tb, metal); p.append(tb)
+    pump = cylinder('pu', (0, -0.38, 0.005), (0, -0.6, 0.005), 0.034, 0.034, 14); set_mat(pump, walnut); p.append(pump)
+    for k in range(5):
+        rg = cylinder('rg', (0, -0.4 - k * 0.04, 0.005), (0, -0.41 - k * 0.04, 0.005), 0.036, 0.036, 14); set_mat(rg, dark); p.append(rg)
+    sk = rbox('sk', (0, 0.18, -0.03), (0.06, 0.3, 0.1), 0.02, rot=(D(-8), 0, 0)); set_mat(sk, walnut); p.append(sk)
+    gr = rbox('gr', (0, 0.0, -0.06), (0.045, 0.06, 0.1), 0.008, rot=(D(20), 0, 0)); set_mat(gr, walnut); p.append(gr)
+    bd = cylinder('bd', (0, -0.86, 0.075), (0, -0.87, 0.085), 0.006, 0.006, 6); set_mat(bd, chrome); p.append(bd)
+    done(p, 'gun_shotgun', 0.9)
+    # sniper (cano bem longo, luneta grande, bipé)
+    p = []
+    b = rbox('b', (0, -0.12, 0.02), (0.07, 0.38, 0.1), 0.012); set_mat(b, olive); p.append(b)
+    br = cylinder('br', (0, -0.3, 0.04), (0, -1.22, 0.04), 0.016, 0.012, 14); set_mat(br, dark); p.append(br)
+    mz = cylinder('mz', (0, -1.18, 0.04), (0, -1.28, 0.04), 0.026, 0.026, 12); set_mat(mz, dark); p.append(mz)
+    sc = cylinder('sc', (0, 0.04, 0.14), (0, -0.32, 0.14), 0.032, 0.032, 18); set_mat(sc, dark); p.append(sc)
+    for y, r in ((0.06, 0.042), (-0.34, 0.048)):
+        e = cylinder('e', (0, y, 0.14), (0, y - 0.06, 0.14), r, r, 18); set_mat(e, dark); p.append(e)
+    for y in (-0.03, -0.22):
+        m = rbox('m', (0, y, 0.095), (0.03, 0.03, 0.05), 0.005); set_mat(m, metal); p.append(m)
+    sk = rbox('sk', (0, 0.25, -0.01), (0.06, 0.34, 0.12), 0.02); set_mat(sk, olive); p.append(sk)
+    ch = rbox('ch', (0, 0.22, 0.06), (0.05, 0.18, 0.04), 0.01); set_mat(ch, dark); p.append(ch)
+    gr = rbox('gr', (0, 0.02, -0.08), (0.045, 0.05, 0.12), 0.008, rot=(D(18), 0, 0)); set_mat(gr, dark); p.append(gr)
+    mg = rbox('mg', (0, -0.14, -0.07), (0.05, 0.08, 0.09), 0.006); set_mat(mg, dark); p.append(mg)
+    bo = cylinder('bo', (0.04, -0.02, 0.06), (0.1, -0.02, 0.06), 0.012, 0.012, 8); set_mat(bo, metal); p.append(bo)
+    for sx in (1, -1):
+        lg = cylinder('lg', (0, -0.58, 0.0), (sx * 0.08, -0.62, -0.2), 0.008, 0.008, 6); set_mat(lg, dark); p.append(lg)
+    done(p, 'gun_sniper', 1.2)
+    # metralhadora (cano grosso, caixa de munição, alça)
+    p = []
+    b = rbox('b', (0, -0.16, 0.03), (0.09, 0.46, 0.12), 0.012); set_mat(b, dark); p.append(b)
+    br = cylinder('br', (0, -0.4, 0.04), (0, -0.98, 0.04), 0.022, 0.022, 14); set_mat(br, dark); p.append(br)
+    jk = cylinder('jk', (0, -0.4, 0.04), (0, -0.7, 0.04), 0.04, 0.04, 12); set_mat(jk, metal); p.append(jk)
+    bx = rbox('bx', (0.0, -0.18, -0.13), (0.12, 0.16, 0.16), 0.012); set_mat(bx, olive); p.append(bx)
+    hd = rbox('hd', (0, -0.22, 0.14), (0.03, 0.16, 0.03), 0.006); set_mat(hd, dark); p.append(hd)
+    for y in (-0.15, -0.29):
+        hp = rbox('hp', (0, y, 0.11), (0.025, 0.025, 0.05), 0.004); set_mat(hp, dark); p.append(hp)
+    sk = rbox('sk', (0, 0.2, 0.0), (0.07, 0.28, 0.11), 0.018); set_mat(sk, dark); p.append(sk)
+    gr = rbox('gr', (0, 0.02, -0.08), (0.045, 0.05, 0.12), 0.008, rot=(D(18), 0, 0)); set_mat(gr, dark); p.append(gr)
+    for sx in (1, -1):
+        lg = cylinder('lg', (0, -0.82, 0.02), (sx * 0.09, -0.86, -0.2), 0.009, 0.009, 6); set_mat(lg, dark); p.append(lg)
+    done(p, 'gun_lmg', 1.5)
+    # revólver
+    p = []
+    fr = rbox('fr', (0, -0.04, 0.04), (0.035, 0.12, 0.07), 0.008); set_mat(fr, chrome); p.append(fr)
+    cy = cylinder('cy', (0, -0.03, 0.045), (0, -0.09, 0.045), 0.036, 0.036, 12); set_mat(cy, chrome); p.append(cy)
+    br = cylinder('br', (0, -0.09, 0.06), (0, -0.24, 0.06), 0.012, 0.012, 12); set_mat(br, chrome); p.append(br)
+    rb = rbox('rb', (0, -0.16, 0.077), (0.012, 0.15, 0.012), 0.003); set_mat(rb, chrome); p.append(rb)
+    gr = rbox('gr', (0, 0.03, -0.04), (0.034, 0.05, 0.11), 0.01, rot=(D(22), 0, 0)); set_mat(gr, walnut); p.append(gr)
+    hm = rbox('hm', (0, 0.03, 0.08), (0.015, 0.03, 0.03), 0.003); set_mat(hm, dark); p.append(hm)
+    done(p, 'gun_revolver', -0.6)
     path = os.path.join(OUT, 'armas.glb')
     bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=False, export_animations=False, export_yup=True, export_apply=True)
     log('salvo', path, os.path.getsize(path))

@@ -763,8 +763,202 @@ def build_props():
     bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=False, export_animations=False, export_yup=True, export_apply=True)
     log('salvo', path, os.path.getsize(path))
 
+def build_extras():
+    reset()
+    paint = material('paint', (0.85, 0.85, 0.85), 0.45, 0.35)
+    dark = material('escuro', srgb(0x2b2d31), 0.6, 0.4)
+    metal = material('metal', srgb(0x8a8f96), 0.35, 0.85)
+    wood = material('madeira', srgb(0x8d6b47), 0.8)
+    wood_d = material('madeira_escura', srgb(0x5e4026), 0.85)
+    white = material('branco', srgb(0xf2f2ef), 0.5)
+    orange = material('laranja', srgb(0xff8a1e), 0.5)
+    glass = material('vidro', srgb(0x1f2a33), 0.08, 0.3)
+    grass = material('grama', srgb(0x5aa83e), 0.9)
+    grass2 = material('grama_clara', srgb(0x7cc04f), 0.9)
+    red = material('vermelho', srgb(0xc0392b), 0.5)
+    yellow = material('amarelo', srgb(0xf1c40f), 0.5)
+    green = material('verde', srgb(0x556b2f), 0.7)
+    blue = material('azul', srgb(0x3c5a7a), 0.6)
+    ice = material('gelo', srgb(0xd6f1ff), 0.08, 0.1)
+    stem = material('caule', srgb(0x3f8f35), 0.8)
+    petal = material('petala', (0.9, 0.9, 0.9), 0.6)
+    # ---- contêiner 6 x 2.6 x 2.45 (comprimento em Y) ----
+    parts = []
+    L, H, Dp = 6.0, 2.6, 2.45
+    c = rbox('c', (0, 0, H / 2), (Dp - 0.06, L - 0.06, H - 0.1), 0.02); set_mat(c, paint); parts.append(c)
+    for k in range(-13, 14):
+        y = k * (L / 2 - 0.3) / 13
+        for sx in (1, -1):
+            r = rbox('r', (sx * (Dp / 2 - 0.02), y, H / 2), (0.06, 0.1, H - 0.3), 0.01); set_mat(r, paint); parts.append(r)
+    for k in range(-4, 5):
+        r = rbox('rt', (k * (Dp / 2 - 0.25) / 4, 0, H - 0.04), (0.1, L - 0.2, 0.05), 0.01); set_mat(r, paint); parts.append(r)
+    for sz in (0.06, H - 0.06):
+        for sx in (1, -1):
+            f = rbox('f', (sx * (Dp / 2 - 0.02), 0, sz), (0.1, L, 0.12), 0.01); set_mat(f, dark); parts.append(f)
+        for sy in (1, -1):
+            f = rbox('f2', (0, sy * (L / 2 - 0.02), sz), (Dp, 0.1, 0.12), 0.01); set_mat(f, dark); parts.append(f)
+    for sx in (1, -1):
+        for sy in (1, -1):
+            p2 = rbox('p', (sx * (Dp / 2 - 0.04), sy * (L / 2 - 0.04), H / 2), (0.14, 0.14, H), 0.01); set_mat(p2, dark); parts.append(p2)
+    for sx in (-0.6, -0.2, 0.2, 0.6):  # trancas das portas
+        b = cylinder('b', (sx, -L / 2 - 0.05, 0.25), (sx, -L / 2 - 0.05, H - 0.25), 0.025, 0.025, 8); set_mat(b, metal); parts.append(b)
+    d = rbox('d', (0, -L / 2 - 0.01, H / 2), (0.03, 0.03, H - 0.3), 0.005); set_mat(d, dark); parts.append(d)
+    finish(parts, 'container')
+    # ---- cerca: 1 m em X (posts nas pontas), escala no comprimento ----
+    parts = []
+    for x in (-0.5, 0.5):
+        p2 = rbox('p', (x, 0, 0.58), (0.12, 0.12, 1.16), 0.015); set_mat(p2, wood_d); parts.append(p2)
+    for z in (0.42, 0.86):
+        r = rbox('r', (0, 0, z), (1.0, 0.06, 0.11), 0.01); set_mat(r, wood); parts.append(r)
+    dg = rbox('dg', (0, 0.0, 0.64), (1.08, 0.04, 0.09), 0.01, rot=(0, D(-24), 0)); set_mat(dg, wood); parts.append(dg)
+    finish(parts, 'fence')
+    # ---- caixa-d'água ----
+    parts = []
+    for sx in (1, -1):
+        for sy in (1, -1):
+            l = cylinder('l', (sx * 1.25, sy * 1.25, 0), (sx * 1.0, sy * 1.0, 5.0), 0.11, 0.09, 8); set_mat(l, wood_d); parts.append(l)
+    for z in (1.6, 3.2):
+        for a in range(4):
+            ang = a * math.pi / 2
+            p1 = Vector((math.cos(ang) - math.sin(ang), math.sin(ang) + math.cos(ang), 0)) * (1.2 - z * 0.05)
+            p2v = Vector((math.cos(ang + math.pi / 2) - math.sin(ang + math.pi / 2), math.sin(ang + math.pi / 2) + math.cos(ang + math.pi / 2), 0)) * (1.2 - z * 0.05)
+            br = cylinder('br', (p1.x, p1.y, z), (p2v.x, p2v.y, z + 1.2), 0.05, 0.05, 6); set_mat(br, wood_d); parts.append(br)
+    tk = cylinder('tk', (0, 0, 5.0), (0, 0, 7.2), 1.6, 1.6, 24); set_mat(tk, metal); parts.append(tk)
+    for z in (5.4, 6.3, 7.0):
+        bd = cylinder('bd', (0, 0, z - 0.04), (0, 0, z + 0.04), 1.63, 1.63, 24); set_mat(bd, dark); parts.append(bd)
+    rf = cylinder('rf', (0, 0, 7.2), (0, 0, 8.1), 1.75, 0.08, 24); set_mat(rf, dark); parts.append(rf)
+    pl = cylinder('pl', (0, 0, 4.9), (0, 0, 5.0), 1.9, 1.9, 24); set_mat(pl, wood); parts.append(pl)
+    lad = rbox('lad', (0, -1.75, 3.2), (0.45, 0.05, 6.4), 0.01); set_mat(lad, metal); parts.append(lad)
+    finish(parts, 'water_tower')
+    # ---- barco (proa para -Y) ----
+    parts = []
+    bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0)
+    for v in bm.verts:
+        top = v.co.z > 0
+        v.co.x *= 1.9 if top else 1.2
+        if v.co.y < 0:
+            v.co.x *= 0.15 if top else 0.05
+            v.co.y *= 5.4 if top else 4.6
+        else:
+            v.co.y *= 4.4
+        v.co.z = v.co.z * 0.9 + 0.1
+    hull = mesh_obj('hull', bm); mb = hull.modifiers.new('b', 'BEVEL'); mb.width = 0.06; mb.segments = 2; bake(hull); smooth(hull)
+    set_mat(hull, paint); parts.append(hull)
+    deck = rbox('dk', (0, 0.4, 0.52), (1.6, 3.4, 0.06), 0.01); set_mat(deck, wood); parts.append(deck)
+    cab = rbox('cb', (0, 0.9, 1.05), (1.2, 1.4, 1.0), 0.06); set_mat(cab, white); parts.append(cab)
+    wn = rbox('wn', (0, 0.18, 1.2), (1.1, 0.04, 0.4), 0.01); set_mat(wn, glass); parts.append(wn)
+    st = rbox('st', (0, 0.4, 0.58), (1.92, 4.2, 0.1), 0.02); set_mat(st, dark); parts.append(st)
+    finish(parts, 'boat')
+    # ---- tufo de grama e flor ----
+    parts = []
+    random.seed(5)
+    for k in range(7):
+        a = k / 7 * math.tau + random.uniform(-0.3, 0.3); r = random.uniform(0.02, 0.1)
+        base = Vector((math.cos(a) * r, math.sin(a) * r, 0)); tip = base + Vector((math.cos(a) * 0.12, math.sin(a) * 0.12, random.uniform(0.3, 0.55)))
+        b = cylinder('g', base, tip, 0.03, 0.002, 3); set_mat(b, grass if k % 2 else grass2); parts.append(b)
+    finish(parts, 'grass')
+    parts = []
+    s1 = cylinder('s', (0, 0, 0), (0.02, 0, 0.32), 0.012, 0.01, 5); set_mat(s1, stem); parts.append(s1)
+    for k in range(5):
+        a = k / 5 * math.tau
+        pt = ico('p', (0.02 + math.cos(a) * 0.045, math.sin(a) * 0.045, 0.33), (0.04, 0.04, 0.015), 1); set_mat(pt, petal); parts.append(pt)
+    cn = ico('cn', (0.02, 0, 0.34), (0.025, 0.025, 0.02), 1); set_mat(cn, yellow); parts.append(cn)
+    lf = ico('lf', (0.05, 0, 0.12), (0.06, 0.02, 0.01), 1); set_mat(lf, stem); parts.append(lf)
+    finish(parts, 'flower')
+    # ---- avião (frente -Y, ~14 m) ----
+    parts = []
+    fus = cylinder('fu', (0, 6.0, 0), (0, -5.8, 0), 1.25, 1.25, 24); set_mat(fus, white); parts.append(fus)
+    nose = ico('no', (0, -5.8, 0), (1.25, 1.6, 1.25), 3); cut_below(nose, lambda c: c.y > -5.8); set_mat(nose, white); parts.append(nose)
+    tl = cylinder('tl', (0, 6.0, 0.1), (0, 9.2, 0.75), 1.25, 0.28, 24); set_mat(tl, white); parts.append(tl)
+    st = rbox('st', (0, 0, -0.45), (2.52, 12, 0.3), 0.05); set_mat(st, orange); parts.append(st)
+    wing = rbox('wg', (0, -0.6, -0.4), (17.5, 2.8, 0.26), 0.08, 3); set_mat(wing, white); parts.append(wing)
+    for sx in (1, -1):
+        tip = rbox('tp', (sx * 8.7, -0.4, -0.35), (0.3, 2.2, 0.3), 0.06); set_mat(tip, orange); parts.append(tip)
+        en = cylinder('en', (sx * 4.3, -2.6, -0.85), (sx * 4.3, 0.4, -0.85), 0.62, 0.5, 18); set_mat(en, metal); parts.append(en)
+        sp = ico('sp', (sx * 4.3, -2.65, -0.85), (0.22, 0.4, 0.22), 2); set_mat(sp, dark); parts.append(sp)
+        for k in range(3):
+            a = k / 3 * math.tau
+            bl = rbox('bl', (sx * 4.3 + math.cos(a) * 0.75, -2.75, -0.85 + math.sin(a) * 0.75), (0.14, 0.04, 1.5), 0.02, rot=(0, -a + math.pi / 2, 0)); set_mat(bl, dark); parts.append(bl)
+    fin = rbox('fn', (0, 8.4, 2.0), (0.24, 2.0, 2.6), 0.05, 2, rot=(D(-18), 0, 0)); set_mat(fin, orange); parts.append(fin)
+    hs = rbox('hs', (0, 8.6, 0.8), (6.0, 1.4, 0.18), 0.05); set_mat(hs, white); parts.append(hs)
+    ck = rbox('ck', (0, -5.3, 0.6), (1.8, 1.0, 0.5), 0.1); set_mat(ck, glass); parts.append(ck)
+    for k in range(9):
+        for sx in (1, -1):
+            w = rbox('w', (sx * 1.22, -3.6 + k * 1.1, 0.25), (0.06, 0.42, 0.45), 0.02); set_mat(w, glass); parts.append(w)
+    dr = rbox('dr', (1.24, 4.6, -0.1), (0.05, 1.0, 1.7), 0.02); set_mat(dr, dark); parts.append(dr)
+    finish(parts, 'plane')
+    # ---- paraquedas (cúpula com gomos) ----
+    parts = []
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=16, v_segments=10, radius=1.0)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < 0.25], context='VERTS')
+    for v in bm.verts:
+        a = math.atan2(v.co.y, v.co.x)
+        v.co.z = v.co.z * 0.75 - 0.05 * (0.5 + 0.5 * math.cos(a * 8))
+        v.co.x *= 2.4; v.co.y *= 2.9; v.co.z += 3.2
+    dome = mesh_obj('dome', bm)
+    sol = dome.modifiers.new('s', 'SOLIDIFY'); sol.thickness = 0.04; bake(dome); smooth(dome)
+    dome.data.materials.append(paint); dome.data.materials.append(white)
+    for pl in dome.data.polygons:
+        a = math.atan2(pl.center.y / 2.9, pl.center.x / 2.4)
+        pl.material_index = 1 if int((a + math.pi) / (math.tau / 8)) % 2 else 0
+    parts.append(dome)
+    for k in range(8):
+        a = k / 8 * math.tau
+        top = Vector((math.cos(a) * 2.3, math.sin(a) * 2.8, 3.25)); bot = Vector((0.2 * math.cos(a), 0.15 * math.sin(a), 1.55))
+        ln = cylinder('ln', bot, top, 0.012, 0.012, 4); set_mat(ln, dark); parts.append(ln)
+    finish(parts, 'chute')
+    # ---- caixa aérea ----
+    parts = []
+    c = rbox('c', (0, 0, 0.55), (1.3, 1.3, 1.05), 0.05); set_mat(c, red); parts.append(c)
+    for z in (0.12, 0.98):
+        b = rbox('b', (0, 0, z), (1.38, 1.38, 0.12), 0.03); set_mat(b, dark); parts.append(b)
+    for sx in (1, -1):
+        b = rbox('s', (sx * 0.66, 0, 0.55), (0.06, 0.22, 1.08), 0.01); set_mat(b, yellow); parts.append(b)
+        b = rbox('s2', (0, sx * 0.66, 0.55), (0.22, 0.06, 1.08), 0.01); set_mat(b, yellow); parts.append(b)
+    for sx in (1, -1):
+        h = rbox('h', (sx * 0.71, 0, 0.6), (0.05, 0.36, 0.08), 0.01); set_mat(h, metal); parts.append(h)
+    finish(parts, 'airdrop')
+    # ---- itens do chão ----
+    parts = []
+    b = rbox('b', (0, 0, 0.18), (0.5, 0.32, 0.36), 0.05); set_mat(b, white); parts.append(b)
+    cr1 = rbox('c1', (0, -0.165, 0.18), (0.08, 0.02, 0.24), 0.005); set_mat(cr1, red); parts.append(cr1)
+    cr2 = rbox('c2', (0, -0.165, 0.18), (0.24, 0.02, 0.08), 0.005); set_mat(cr2, red); parts.append(cr2)
+    hd = rbox('hd', (0, 0, 0.39), (0.2, 0.06, 0.05), 0.01); set_mat(hd, dark); parts.append(hd)
+    finish(parts, 'item_med')
+    parts = []
+    v1 = rbox('v', (0, 0, 0.3), (0.56, 0.2, 0.6), 0.06, 3); set_mat(v1, blue); parts.append(v1)
+    nk = rbox('nk', (0, -0.11, 0.55), (0.22, 0.04, 0.12), 0.02); set_mat(nk, material('pele_item', srgb(0x2c4258), 0.6)); parts.append(nk)
+    for sx in (1, -1):
+        po = rbox('po', (sx * 0.14, -0.11, 0.2), (0.16, 0.05, 0.14), 0.015); set_mat(po, dark); parts.append(po)
+    finish(parts, 'item_vest')
+    parts = []
+    b = rbox('b', (0, 0, 0.16), (0.52, 0.3, 0.3), 0.03); set_mat(b, green); parts.append(b)
+    lid = rbox('l', (0, 0, 0.33), (0.54, 0.32, 0.05), 0.01); set_mat(lid, dark); parts.append(lid)
+    for k in range(4):
+        bl = cylinder('bl', (-0.15 + k * 0.1, -0.16, 0.08), (-0.15 + k * 0.1, -0.16, 0.24), 0.02, 0.02, 8); set_mat(bl, yellow); parts.append(bl)
+    finish(parts, 'item_ammo')
+    parts = []
+    g = ico('g', (0, 0, 0.2), (0.17, 0.17, 0.2), 2); set_mat(g, ice); parts.append(g)
+    rg = cylinder('rg', (0, 0, 0.18), (0, 0, 0.24), 0.175, 0.175, 16); set_mat(rg, blue); parts.append(rg)
+    pin = cylinder('pn', (0, 0, 0.38), (0, 0, 0.45), 0.03, 0.03, 8); set_mat(pin, metal); parts.append(pin)
+    finish(parts, 'item_wall')
+    # ---- parede de gelo (1 x 1 x 1, origem no chão) ----
+    parts = []
+    w = rbox('w', (0, 0, 0.5), (1, 0.8, 1), 0.08, 3)
+    for v in w.data.vertices:
+        n = mnoise.noise(v.co * 6.0)
+        v.co.y += n * 0.06
+    set_mat(w, ice); parts.append(w)
+    for k in range(5):
+        cr = ico('cr', (-0.4 + k * 0.2, 0, 0.97 + (k % 2) * 0.04), (0.09, 0.3, 0.09), 1, 0.3, k, flat=True); set_mat(cr, ice); parts.append(cr)
+    finish(parts, 'icewall')
+    path = os.path.join(OUT, 'extras.glb')
+    bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=False, export_animations=False, export_yup=True, export_apply=True)
+    log('salvo', path, os.path.getsize(path))
+
 ok = True
-for fn in (build_character, build_guns, build_props):
+for fn in (build_character, build_guns, build_props, build_extras):
     try:
         fn()
     except Exception:

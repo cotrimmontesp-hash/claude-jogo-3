@@ -1,0 +1,44 @@
+[modelos] corpo
+[modelos] cabeça
+[modelos] cabelos
+[modelos] acessórios
+[modelos] pesos
+[modelos] animações
+08:51:47 | INFO: Starting glTF 2.0 export
+08:51:47 | INFO: Extracting primitive: backpack
+08:51:47 | INFO: Primitives created: 2
+08:51:47 | INFO: Extracting primitive: body.001
+08:51:47 | INFO: Primitives created: 6
+08:51:47 | INFO: Extracting primitive: hair_bandana
+08:51:47 | INFO: Primitives created: 2
+08:51:47 | INFO: Extracting primitive: hair_cap
+08:51:47 | INFO: Primitives created: 2
+08:51:47 | INFO: Extracting primitive: hair_long
+08:51:47 | INFO: Primitives created: 2
+08:51:47 | INFO: Extracting primitive: hair_mohawk
+08:51:47 | INFO: Primitives created: 1
+08:51:47 | INFO: Extracting primitive: hair_short.001
+08:51:47 | INFO: Primitives created: 1
+08:51:47 | INFO: Extracting primitive: head
+08:51:47 | INFO: Primitives created: 5
+08:51:47 | INFO: Extracting primitive: vest
+08:51:47 | INFO: Primitives created: 2
+08:51:48 | INFO: Finished glTF 2.0 export in 0.9256503582000732 s
+INFO Draco mesh compression is available, use library at /home/runner/work/claude-jogo-3/claude-jogo-3/blender-app/4.2/python/lib/python3.11/site-packages/libextern_draco.so
+
+[modelos] salvo models/personagem.glb 643828
+08:51:48 | INFO: Starting glTF 2.0 export
+08:51:48 | INFO: Extracting primitive: gun_rifle
+08:51:48 | INFO: Primitives created: 3
+08:51:48 | INFO: Extracting primitive: gun_gold
+08:51:48 | INFO: Primitives created: 3
+08:51:48 | INFO: Extracting primitive: gun_pistol
+08:51:48 | INFO: Primitives created: 2
+08:51:48 | INFO: Finished glTF 2.0 export in 0.018457412719726562 s
+
+[modelos] salvo models/armas.glb 52248
+[modelos] FIM OK
+Blender 4.2.3 LTS (hash 0e22e4fcea03 built 2024-10-14 23:31:34)
+
+Blender quit
+codigo de saida: 0
